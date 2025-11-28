@@ -1,2 +1,2 @@
 # Accelerator
-Accelerate Image Processing using approximate hardware
+Accelerate using approximate hardware
