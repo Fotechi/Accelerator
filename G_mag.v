@@ -4,7 +4,7 @@
 // Engineer: 
 // 
 // Create Date:    
-// Design Name: 
+// Design Name:  
 // Module Name:    mag 
 // Project Name: 
 // Target Devices: 
