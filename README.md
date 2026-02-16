@@ -13,6 +13,7 @@ Directions (x,y)   Bits (Width)  Locations (Depth)
         ________________________________|________________________________
         |                   |                                  |         |
  Input Data Storage     Convolution(Data Access + MAC)      Magnitude    Threshold Comparison
+
  
 <img width="750" height="614" alt="Main_Module" src="https://github.com/user-attachments/assets/5fc82d76-003a-4543-8a5c-37423e6c096b" />
 
