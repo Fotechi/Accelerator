@@ -1,13 +1,14 @@
 # Accelerator
 Accelerate using approximate hardware
-Our main objective is to perform image processing fastly using strided convolution as part of the algorithm. The architecture is divided into RTL modules, each with a specific function. The main module coordinates communication among the modules and also performs key tasks such as slicing incoming data and parallelizing operations.
-Change Parameters str_Y & str_X in main and data access file accordingly along with certain modifications.
-  Stride                 Memory
-Directions (x,y)   Bits (Width)  Locations (Depth) 
-1,1                8                    1
-2,1                16                   1
-1,2                8                    32 = 4096/128 
-2,2                16                   32
+Our main objective is to perform image processing fastly using strided convolution as part of the algorithm. The architecture is divided into RTL modules, each with a specific function. The main module coordinates communication among the modules and also performs key tasks such as slicing incoming data and parallelizing operations.   
+Change Parameters str_Y & str_X in main and data access file accordingly along with certain modifications.   
+| Stride Directions (x,y) | Memory Bits (Width) | Memory Locations (Depth) |
+| :--- | :--- | :--- |
+| 1,1 | 8 | 1 |
+| 2,1 | 16 | 1 |
+| 1,2 | 8 | 32 = 4096/128 |
+| 2,2 | 16 | 32 |
+
 
                                     Main Module
         ________________________________|________________________________
