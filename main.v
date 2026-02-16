@@ -71,27 +71,7 @@ DataAccess #(.N(N),
 			.ptr(ptr)
 );
 
-/* DA_3_ii_strx_2 #(.N(N), 
-               .Nextra(0),
-               .N_str_x(N_str_x ),
-               .str_x(str_X)) uut_DA_strx ( 
-            .clk(clk),
-			.reset(reset ),
-			.data_a(data_porta),
-			.data_b(data_portb),
-			.adr_1(addra),
-			.adr_2(addrb),
-			.wea(wa),
-			.web(wb),
-			.data_valid(data_valid), //For MAc
-			.Idle_state(idle), 	// ==
-			.slice_out(slice),						// slice is wire and will use in vector part select... declare as integer allowed??		
-			.data_1(data_1),
-			.data_2(data_2),
-			.data_3(data_3),
-			.ptr(ptr)
-			);
-*/// Parallel
+// Parallel
 genvar index;
 generate 
 
