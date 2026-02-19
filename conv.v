@@ -5,7 +5,7 @@
 // 
 // Create Date: 
 // Design Name: 
-// Module Name: DA_3_ii_strx_2
+// Module Name: DataAccess
 // Project Name: 
 // Target Devices: 
 // Tool Versions: 
@@ -20,30 +20,31 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module DA_3_ii_strx_2 #(parameter next_row= 32,  
-                    parameter row3=64,                        
+module DataAccess(parameter next_row= 32,  
+                    parameter row3=64,     
                     parameter input_Datawidth= 128,
                     parameter slice_wdth=7,      
                     parameter output_Datawidth= 128,
                     parameter ptr_wdth=14,      
                     parameter Address_width= 14,
                     parameter N =3,
-				            parameter Nextra =1,		
+				    parameter Nextra =1,		
                     parameter str_y_1=1,		
-                    parameter str_x=16,
-				          	parameter position = 0,                               
-                    parameter slide1=32,
-                    parameter N_str_x= 48,		   
-                    parameter next_row_1= 33,                         
-                    parameter row3_1= 65,                              
-                    parameter starting_bit=16 ,                       
-                    parameter S0  = 0 ,                                                          
-                    parameter S0b = 1 ,                                                          
-                    parameter S1  = 2 ,                                                          
-                    parameter S1b = 3,                                                          
-                    parameter S2  = 4,                                                          
-                    parameter S2b = 5,
-                    S3=6                                                       
+                    parameter str_x=8,
+					parameter position = 0,                                 parameter slide1=32,
+
+					parameter N_str_x= 24,		    
+		            parameter next_row_1= 33,                          
+		            parameter row3_1= 65,                              
+		            
+		            parameter starting_bit=16 ,                             
+		            parameter S0  = 0 ,                                                          
+		            parameter S0b = 1 ,                                                          
+		            parameter S1  = 2 ,                                                          
+		            parameter S1b = 3,                                                          
+		            parameter S2  = 4,                                                          
+		            parameter S2b = 5,
+		            S3=6                                                       
 )(
 
 		input clk, 
@@ -59,30 +60,32 @@ module DA_3_ii_strx_2 #(parameter next_row= 32,
 		output reg [slice_wdth-1:0] slice_out,
 		output reg [output_Datawidth-1:0] data_1, 
 		output reg [output_Datawidth-1:0] data_2, 
-		output reg [output_Datawidth-1:0] data_3,
-		output reg [Address_width-1:0] ptr
+		output reg [output_Datawidth-1:0] data_3
+		,
+				output reg [Address_width-1:0] ptr
 				//output reg [2:0] state
-        //output	reg [1:0] chk,n_chk,s,n_s,s_delay
+		//output	reg [1:0] chk,n_chk,s,n_s
  
     );
 	 
 reg data1nd2, data_valid_delay,d1;
 reg [2:0] valid_loc;
-//reg [Address_width-1:0] ptr=0;  //redeclaration of ANSI port not allowed
 reg [slice_wdth-1:0] slice,slice_delay,s1;
 reg [slice_wdth-1:0] slice1;
 reg [1:0] C_grp;
 reg [1:0] C;
+reg [1:0] chk,n_chk,s,n_s;
 reg [2:0] State_delay,State1;
-reg [2:0] state ;
+ reg [2:0] state ;
 integer start;
-reg [1:0] chk,n_chk,s,n_s,s_delay;
+
 
 always @ (posedge clk)
 begin
 if(reset==1)
 begin
 data1nd2<=0;
+//state<=S0;
 wea<=0;
 web<=0;
 chk<=2;
@@ -95,8 +98,7 @@ adr_1<=ptr;
 adr_2<=ptr+next_row;
 data1nd2<=1;
 data_valid_delay<=0;              state<=S0;
-slice_delay<=slice;		
-end
+slice_delay<=slice;		end
 
 else if (data1nd2   && C_grp==0)
 begin
@@ -112,22 +114,26 @@ adr_2 <= ptr+next_row_1;
 chk<=n_chk;  
 data1nd2<=1;                
 data_valid_delay<=0;               state<=S1;
-slice_delay<=slice1;                                                               
+slice_delay<=slice1; //chk<=n_chk;                                                               
 end
 
 else if (data1nd2  && C_grp==1)
 begin
+if((chk==0 && s==0) ||(chk==1 && s==1)|| (chk==2 && s==2))
+adr_2 <= ptr+row3_1;
+else if ((chk==0 && s==1) || (chk==2 && s==0) || (chk==1 && s==2))
 adr_2 <= ptr+row3;
-data_valid_delay<=1;                                                      
+else
+adr_2 <= ptr+row3;
+
+data_valid_delay<=1;                                                       
 data1nd2<=0;    
                              state<=S1b;
 end
 
 else if(!data1nd2  && C==2)                               
 begin						  			
-adr_1 <= ptr;		                         
-adr_2 <= ptr+next_row;                      
-data1nd2<=1;
+adr_2 <= ptr+next_row;                      data1nd2<=1;
 data_valid_delay<=0;
 slice_delay<=slice;
                                  state<=S2;
@@ -135,17 +141,15 @@ end
 
 else if(data1nd2  && C_grp==2)                               
 begin									
-adr_2 <= ptr+row3;                            
-data1nd2<=0;
+adr_2 <= ptr+row3;                            data1nd2<=0;
 data_valid_delay<=1;
                          state<=S2b;
 end
 
-
 else if(!data1nd2 && C==3)
 begin
-if (slice==112)
-slice_delay<=slice-8;
+if (slice==96)
+slice_delay<=slice1;
 else
 slice_delay<=slice;
                state<=S3; 
@@ -174,24 +178,32 @@ C       =0;
 end
 else if (slice==96-N*str_x && ((ptr+1) % next_row)!=0) begin            
 valid_loc	= 3'b100;
-    C       =3;                       
+    if (ptr==0)
+    C       =0;
+    else
+    C       =3;                      
 end
 
-else if (slice>96-N*str_x   &&  slice1==0 && ((ptr+1) % next_row)!=0)  begin    
+else if (slice==96  &&  slice1==0 && ((ptr+1) % next_row)!=0)  begin    
+if ( (ptr%next_row==0)||(chk==2 && ptr==adr_1 && ptr%3!=0) )               
+ valid_loc	= 1;  
+else if ((ptr==adr_1 && ptr%3!=0)||((chk==1 || chk==0) && ptr==adr_1 && ptr%3==0))                   
 valid_loc	= 2;
+else
+valid_loc	= 1;  
+
 
 C       =1;                         
 end
-
-else if (slice1!=0  && (slice==0) && ((ptr+1) % next_row)!=0 ) begin
-valid_loc	= 0 ;
-C       =2  ;                      
+else if (slice1!=0 && slice==96 && ((ptr+1) % next_row)!=0) begin 
+valid_loc	= 2;
+C       =3;                         
 
 end
 
-else if (slice1!=0  && (slice==16) && ((ptr+1) % next_row)!=0) begin
-valid_loc	= 3'b100;
-C       =2;
+else if (slice1!=0  && slice==0 && ((ptr+1) % next_row)!=0 ) begin
+valid_loc	= 0 ;
+C       =2  ;                       
 end
 
 else if(slice<96-N*str_x && slice1 != 0   && (ptr+1) % next_row != 0 ) 
@@ -200,21 +212,18 @@ C       =3  ;
 valid_loc   =0;
 end
 
-
-
 else if (slice <112-N*str_x && ((ptr+1) % next_row)==0) begin   
 valid_loc	= 0;
 C       =0;
 end
-
 else if (slice==112-N*str_x && ((ptr+1) % next_row)==0) begin
 valid_loc	= 3;
 C       =3;
 end
 else
 begin
-valid_loc	= 4; C       =3;     
-
+valid_loc	= 4; 
+C       =3;     
 end
 
 end
@@ -230,8 +239,7 @@ end
 
 
 
-
-assign Idle_state	= (slice_out > (112-N*str_x)) ?    3'd1   :   3'd7; 
+assign Idle_state	= 3'd7; 						
 
 always @(posedge clk)               					 
 begin
@@ -243,10 +251,10 @@ slice1<=0;
 s<=0;
 end
 else if (!data1nd2)
-case(valid_loc)                                          
-	0 : 	begin				  			
+case(valid_loc)                                             
+	0 : 	begin				  			   
 			slice <= slice+N_str_x ;
-						end
+											end
 3'b100:		begin 						
 	        slice1 <= 0;	
 			slice <= slice+N_str_x ;               
@@ -254,13 +262,14 @@ case(valid_loc)
 			end
 		
     1: 		begin 							
-			slice1 <= slice1+N_str_x ;               end
+			slice1 <= slice1+N_str_x ;               
+end
     2: 		begin 	
     		ptr<=ptr+1;			                          		s<=n_s;
-    		if( s!=1 && (ptr+2) % next_row != 0 )                  
-    		slice <=0;					
+    		if((ptr+2) % next_row != 0 )                      		
+slice <=0;					
 			else
-			slice <= 16;                 
+			slice <= 16;                 			
 			slice1 <= slice1+N_str_x ; 
 			end
 				
@@ -285,11 +294,9 @@ end
 always @ (posedge clk)
 begin
 State_delay<=state;
-s1<=slice_delay;//end
-slice_out<=s1;
+s1<=slice_delay;slice_out<=s1;
 d1<=data_valid_delay;
 data_valid<={N{d1}};
-
 end
 always @ (*)
 begin
@@ -301,7 +308,7 @@ begin
 
 case (State1)
     S0:         begin
-            data_1<=data_a;                        
+            data_1<=data_a;                          
             data_2<=data_b;
             
 			end
@@ -311,21 +318,22 @@ case (State1)
 			end
     S1:         begin
            if (chk==0) begin
-            data_1<={data_a[0 +: (input_Datawidth-slide1)], data_1[ input_Datawidth-slide1 +: slide1]}; 
+            data_1<={data_a[0 +: (input_Datawidth-slide1)], data_1[ input_Datawidth-slide1 +: slide1]};  
             data_2<={data_b[0 +: input_Datawidth-slide1], data_2[input_Datawidth-slide1 +: slide1]} ;
             end
             else if(chk==1) begin
-            data_1<={data_a[0 +: (input_Datawidth-16)], data_1[ input_Datawidth-slide1 +: 16]};
+            data_1<={data_a[0 +: (input_Datawidth-16)], data_1[ input_Datawidth-slide1 +: 16]}; 
             data_2<={data_b[0 +: input_Datawidth-16], data_2[input_Datawidth-slide1 +: 16]} ;
             end
             else if (chk==2)begin
-            data_1<={data_a[0 +: (input_Datawidth-48)], data_1[ input_Datawidth-64 +: 48]};  
-            data_2<={data_b[0 +: input_Datawidth-48], data_2[input_Datawidth-64 +: 48]} ;
+            data_1<={data_a[0 +: (input_Datawidth-24)], data_1[ input_Datawidth-slide1 +: 24]};  
+            data_2<={data_b[0 +: input_Datawidth-24], data_2[input_Datawidth-slide1 +: 24]} ;
             end
             
 
 
 
+ 
 			end
     S1b:        begin
             if (chk==0)            
@@ -333,14 +341,15 @@ case (State1)
             else if(chk==1)
             data_3<={data_b[0 +: input_Datawidth-16], data_3[input_Datawidth-slide1  +: 16]};
             else  if (chk==2) 
-            data_3<={data_b[0 +: input_Datawidth-48], data_3[input_Datawidth-64  +: 48]};
+            data_3<={data_b[0 +: input_Datawidth-24], data_3[input_Datawidth-slide1  +: 24]};
 
+ 
 
 			
 			end
     S2:         begin
             if (s==0)begin
-            data_1<=data_a[start +: (input_Datawidth)];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+            data_1<=data_a[start +: (input_Datawidth)];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
             data_2<=data_b[start +: (input_Datawidth)];
             
             end
@@ -349,44 +358,33 @@ case (State1)
             data_2<=data_b[start +: (input_Datawidth-16)];
             end
             else begin
-            
-            data_1<=data_a[start +: (input_Datawidth-16)];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-            data_2<=data_b[start +: (input_Datawidth-16)];
-            s_delay<=2;
+            data_1<=data_a[start +: (input_Datawidth-8)];                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+            data_2<=data_b[start +: (input_Datawidth-8)];
             end
+ 
 
 
 			
 			end
     S2b:        begin
-            if (s_delay==2)
-            begin
-            data_3<=data_b[16 +: (input_Datawidth-16)];s_delay=0;
-            end
-            else if (s==0)
+            if (s==0)
             data_3<=data_b[start +: (input_Datawidth)];   
             else if(s==1) 
             data_3<=data_b[start +: (input_Datawidth-16)];
-             
-            else;
+            else
+            data_3<=data_b[start +: (input_Datawidth-8)];
+           
+ 
             end
     S3:     begin
-            if ((ptr+1) % next_row==0)
-            begin
-            data_1<={8'b0,data_1[8 +: input_Datawidth-8]};
-            data_2<={8'b0,data_2[8 +: input_Datawidth-8]};
-            data_3<={8'b0,data_3[8 +: input_Datawidth-8]};
-            end
-            else
-            begin
             data_1<=data_1;
             data_2<=data_2;
             data_3<=data_3;
-           end
+           
             end
             
 default:    begin				
-			data_1<=data_1;                         
+			data_1<=data_1;                           
             data_2<=data_2;
             data_3<=data_3;
 
@@ -394,21 +392,24 @@ default:    begin
             end
 endcase
 end
+ 
 
 always @ *
 begin
 case(s)
 0:  begin
     start=0;
-    n_s=1;      
+    n_s=1;       
     end
 1:  begin
     start=16;
+ 
     n_s=2;
     
+ 
     end 
 2:  begin
-    start=16;
+    start=8;
     n_s=0;
     end  
 default: begin
@@ -422,7 +423,7 @@ end
 begin
 case(chk)
 2:  begin
-    n_chk=0;      //next state
+    n_chk=0;       
     end
 0:  begin
     if((ptr) % next_row == 0 )  
@@ -440,7 +441,4 @@ default: begin
          end  
 endcase
 end      
-
 endmodule
-
-
