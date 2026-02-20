@@ -1,5 +1,7 @@
+
+
 # Accelerator
-Accelerate using approximate hardware
+Accelerate using approximate hardware 
 Our main objective is to perform image processing fastly using strided convolution as part of the algorithm. The architecture is divided into RTL modules, each with a specific function. The main module coordinates communication among the modules and also performs key tasks such as slicing incoming data and parallelizing operations.   
 Change Parameters str_Y & str_X in main and data access file accordingly along with certain modifications.   
 | Stride Directions (x,y) | Memory Bits (Width) | Memory Locations (Depth) |
@@ -10,7 +12,7 @@ Change Parameters str_Y & str_X in main and data access file accordingly along w
 | 2,2 | 16 | 32 |
 
 
-                                    Main Module
+                                   
         ________________________________|________________________________
         |                   |                                  |         |
  Input Data Storage     Convolution(Data Access + MAC)      Magnitude    Threshold Comparison
@@ -18,7 +20,7 @@ Change Parameters str_Y & str_X in main and data access file accordingly along w
  
 <img width="750" height="614" alt="Main_Module" src="https://github.com/user-attachments/assets/5fc82d76-003a-4543-8a5c-37423e6c096b" />
 
-For Input Data: BRAM is initialized with image .coe file. Its size is 4096x512 bits with 128 as the read width. For initialization, certain steps are taken to convert image into coe file based on the desired configuration.
+For Input Data: BRAM is initialized with image .coe file. Its size is 4096x512 bits with 128 as the read width. For initialization, certain steps are taken to convert image into coe file based on the desired configuration. 
 
 Data Access module: Then how to access and provide data is governed by Data Access module which efficiently reads memory even before the data to be required for processing by further modules. So as to provide data the same clk cycle when its required by the very next module in the sequence. 
 
@@ -28,4 +30,17 @@ Magnitude: Because of the x and y directions, approximate magnitude is computed 
 
 Threshold Comparison: Then the magnitude is compared with the threshold as set by trials before final implementation. 
 
- 
+Algorithm:-
+Main Module 
+BRAM
+Data Access
+MAC
+G_MAG
+CMP
+
+Simulate
+Using Testbench, check the functional & timing simulation after synthesis and implementation
+
+Performance
+Using standard metrics, algorithm is assessed using evaluate.v and .m
+The hex data processed is written in a hex file during simulation is used to compare from reference input data
