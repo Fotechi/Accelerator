@@ -44,10 +44,7 @@ initial  begin
                                 j+  - because 1st byte of each location not being used
                             */                               
             
-            //if ((i+1) % o_width == 0)
-            //j=j+3;  //stride in y & boundary 
-            //else
-            //j=j+1; //stride in x
+            
             end
     avg = sum/260100;
     $display("psnr %f",avg);
